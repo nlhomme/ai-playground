@@ -44,7 +44,7 @@ async def main():
         )
 
         # Display Mistral answer
-        print("AI: ")
+        print("Mistral: ", end = "")
         async for chunk in response:
             if chunk.data.choices[0].delta.content is not None:
                 print(chunk.data.choices[0].delta.content, end="")
