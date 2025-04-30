@@ -5,6 +5,7 @@
 - ADD: logs generation
 - ADD: logs folder and macOS to .gitignore
 - ADD: API Key check
+- ADD: error handling whenk check API key's presence and validation
 
 ## v0.1
 
