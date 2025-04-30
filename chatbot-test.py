@@ -1,23 +1,82 @@
+import argparse
 import asyncio
 import os
-
+from logger import get_logger
 from mistralai import Mistral
 
 # VARIABLES
 userInput: str
+model: str = "mistral-tiny"
 
+def parse_arguments():
+    """
+    Allow user to manually set the log level beetween DEBUG, INFO (default value), WARNING, ERROR AND CRITICAL
+
+    Example:
+    ```
+        chatbot-test.py --logLevel DEBUG
+    ```
+
+    Show a help message via the '-t' argument
+    """
+    parser = argparse.ArgumentParser(description="Requirements to use the AI playground chatbot")
+    parser.add_argument("--logLevel", required=False, type=str, default="INFO", help="Log level between DEBUG, INFO, WARNING, ERROR AND CRITICAL (default set to INFO)")
+    return parser.parse_args()
+
+def mistral_check(apiKey):
+    """
+    Check if Mistral API key is valid by sending it a 'bonjour' message
+
+    If key is valid a welcome message is displayed
+    """
+    client = Mistral(api_key=apiKey)
+    response = client.chat.complete(
+        model=model,
+        messages=[
+             {
+                  "role": "user",
+                  "content": "Ne dis rien d'autre que bonjour",
+             },
+        ],
+    )
+
+    # Displaying Mistral answer as validation
+    print("Mistral: ", end = "")
+    print(response.choices[0].message.content)
+     # Resetting the display
+    print()
 
 async def main():
-    api_key = os.environ["MISTRAL_API_KEY"]
-    model = "mistral-tiny"
+    args = parse_arguments()
+
+    # Initiating logger
+    logLevel = args.logLevel
+    logger = get_logger("logs", "ai-playground", logLevel)
+    logger.info(f"Program has started")
+
+    # Retrieve the API key as an environment variable
+    try:
+        api_key = os.environ["MISTRAL_API_KEY"]
+    except:
+        logger.error("Env var MISTRAL_API_KEY not found in PATH, exiting...")
+        exit(1)
+
+    # Initiate Mistral by checking if API Key is valid
+    try:
+        logger.debug(f"Initiating Mistral API key check")
+        mistral_check(api_key) 
+    except Exception as error:
+        logger.error(error)
+        logger.error(f"Program exited due to error, check the error message above")
+        exit(1)
+    else:
+
+        logger.debug(f"APY key seems valid, proceeding...")
 
     client = Mistral(api_key=api_key)
 
-    print("Welcome")
-    print()
-
     while True:
-        # Reset the user input value to avoid repeating
+        # Resetting the user input value to avoid repeating
         userInput = None
 
         # Do nothing while user hasn't typed anything
@@ -26,13 +85,13 @@ async def main():
             print()
             userInput = input("Vous: ")
 
-
-        # Quit program properly
+        # Quitting program properly
         if "quit" in userInput:
             print("A la prochaine!")
+            logger.info(f"Program exit initiated by user")
             exit(0)
 
-        # Send user input to Mistral and wait for its answer
+        # Sending the user input to Mistral and wait for its answer
         response = await client.chat.stream_async(
             model=model,
             messages=[
@@ -42,14 +101,15 @@ async def main():
                   },
             ],
         )
+        logger.debug(f"User sended prompt :" + userInput)
 
-        # Display Mistral answer
+        # Displaying Mistral answer
         print("Mistral: ", end = "")
         async for chunk in response:
             if chunk.data.choices[0].delta.content is not None:
                 print(chunk.data.choices[0].delta.content, end="")
 
-        # Reset the display
+        # Resetting the display
         print()
 
 
