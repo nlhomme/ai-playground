@@ -54,15 +54,24 @@ async def main():
     logger = get_logger("logs", "ai-playground", logLevel)
     logger.info(f"Program has started")
 
+    # Retrieve the API key as an environment variable
     try:
         api_key = os.environ["MISTRAL_API_KEY"]
+    except:
+        logger.error("Env var MISTRAL_API_KEY not found in PATH, exiting...")
+        exit(1)
+
+    # Initiate Mistral by checking if API Key is valid
+    try:
         logger.debug(f"Initiating Mistral API key check")
-        mistral_check(api_key)
-        logger.debug(f"APY key seems valid, proceeding...")
+        mistral_check(api_key) 
     except Exception as error:
         logger.error(error)
         logger.error("Program exited due to error, check the error message above")
         exit(1)
+    else:
+
+        logger.debug(f"APY key seems valid, proceeding...")
 
     client = Mistral(api_key=api_key)
 
