@@ -55,7 +55,7 @@ async def main():
     logger.info(f"Program has started")
 
     try:
-        api_key = os.environ["MISTRAL_APA_KEY"]
+        api_key = os.environ["MISTRAL_API_KEY"]
         logger.debug(f"Initiating Mistral API key check")
         mistral_check(api_key)
         logger.debug(f"APY key seems valid, proceeding...")
