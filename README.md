@@ -41,3 +41,7 @@ options:
   -h, --help           show this help message and exit
   --logLevel LOGLEVEL  Log level between DEBUG, INFO, WARNING, ERROR AND CRITICAL (default set to INFO)
 ```
+
+## Thanks
+
+Thank you [@alexandra-zaharia](https://github.com/alexandra-zaharia) for [the logger](https://alexandra-zaharia.github.io/posts/make-your-own-custom-color-formatter-with-python-logging/)
