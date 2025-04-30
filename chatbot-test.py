@@ -67,7 +67,7 @@ async def main():
         mistral_check(api_key) 
     except Exception as error:
         logger.error(error)
-        logger.error("Program exited due to error, check the error message above")
+        logger.error(f"Program exited due to error, check the error message above")
         exit(1)
     else:
 
