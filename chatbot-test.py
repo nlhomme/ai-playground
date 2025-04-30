@@ -6,6 +6,7 @@ from mistralai import Mistral
 
 # VARIABLES
 userInput: str
+model: str = "mistral-tiny"
 
 def parse_arguments():
     """
@@ -22,6 +23,29 @@ def parse_arguments():
     parser.add_argument("--logLevel", required=False, type=str, default="INFO", help="Log level between DEBUG, INFO, WARNING, ERROR AND CRITICAL (default set to INFO)")
     return parser.parse_args()
 
+def mistral_check(apiKey):
+    """
+    Check if Mistral API key is valid by sending it a 'bonjour' message
+
+    If key is valid a welcome message is displayed
+    """
+    client = Mistral(api_key=apiKey)
+    response = client.chat.complete(
+        model=model,
+        messages=[
+             {
+                  "role": "user",
+                  "content": "Ne dis rien d'autre que bonjour",
+             },
+        ],
+    )
+
+    # Displaying Mistral answer as validation
+    print("Mistral: ", end = "")
+    print(response.choices[0].message.content)
+     # Resetting the display
+    print()
+
 async def main():
     args = parse_arguments()
 
@@ -30,16 +54,20 @@ async def main():
     logger = get_logger("logs", "ai-playground", logLevel)
     logger.info(f"Program has started")
 
-    api_key = os.environ["MISTRAL_API_KEY"]
-    model = "mistral-tiny"
+    try:
+        api_key = os.environ["MISTRAL_APA_KEY"]
+        logger.debug(f"Initiating Mistral API key check")
+        mistral_check(api_key)
+        logger.debug(f"APY key seems valid, proceeding...")
+    except Exception as error:
+        logger.error(error)
+        logger.error("Program exited due to error, check the error message above")
+        exit(1)
 
     client = Mistral(api_key=api_key)
 
-    print("Welcome")
-    print()
-
     while True:
-        # Reset the user input value to avoid repeating
+        # Resetting the user input value to avoid repeating
         userInput = None
 
         # Do nothing while user hasn't typed anything
@@ -48,13 +76,13 @@ async def main():
             print()
             userInput = input("Vous: ")
 
-        # Quit program properly
+        # Quitting program properly
         if "quit" in userInput:
             print("A la prochaine!")
             logger.info(f"Program exit initiated by user")
             exit(0)
 
-        # Send user input to Mistral and wait for its answer
+        # Sending the user input to Mistral and wait for its answer
         response = await client.chat.stream_async(
             model=model,
             messages=[
@@ -66,13 +94,13 @@ async def main():
         )
         logger.debug(f"User sended prompt :" + userInput)
 
-        # Display Mistral answer
+        # Displaying Mistral answer
         print("Mistral: ", end = "")
         async for chunk in response:
             if chunk.data.choices[0].delta.content is not None:
                 print(chunk.data.choices[0].delta.content, end="")
 
-        # Reset the display
+        # Resetting the display
         print()
 
 
