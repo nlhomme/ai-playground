@@ -43,8 +43,6 @@ def mistral_check(apiKey):
     # Displaying Mistral answer as validation
     print("Mistral: ", end = "")
     print(response.choices[0].message.content)
-     # Resetting the display
-    print()
 
 async def main():
     args = parse_arguments()
