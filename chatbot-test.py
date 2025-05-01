@@ -28,6 +28,7 @@ def mistral_check(apiKey):
     Check if Mistral API key is valid by sending it a 'bonjour' message
 
     If key is valid a welcome message is displayed
+    If not, error is displayed
     """
     client = Mistral(api_key=apiKey)
     response = client.chat.complete(
@@ -40,9 +41,8 @@ def mistral_check(apiKey):
         ],
     )
 
-    # Displaying Mistral answer as validation
-    print("Mistral: ", end = "")
-    print(response.choices[0].message.content)
+    # Return Mistral answer as validation
+    return("Mistral: " + response.choices[0].message.content)
 
 async def main():
     args = parse_arguments()
@@ -62,13 +62,12 @@ async def main():
     # Initiate Mistral by checking if API Key is valid
     try:
         logger.debug("Initiating Mistral API key check")
-        mistral_check(api_key) 
+        print(mistral_check(api_key))
     except Exception as error:
         logger.error(error)
         logger.error("Program exited due to error, check the error message above")
         exit(1)
     else:
-
         logger.debug("APY key seems valid, proceeding...")
 
     client = Mistral(api_key=api_key)
