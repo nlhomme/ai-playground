@@ -5,6 +5,7 @@ from logger import get_logger
 from mistralai import Mistral
 
 # VARIABLES
+logger = ""
 userInput: str
 model: str = "mistral-tiny"
 
@@ -47,8 +48,9 @@ def mistral_check(apiKey):
 async def main():
     args = parse_arguments()
 
-    # Initiating logger
+    # Initiating logger globally
     logLevel = args.logLevel
+    global logger
     logger = get_logger("logs", "ai-playground", logLevel)
     logger.info("Program has started")
 
