@@ -1,10 +1,12 @@
 import argparse
 import asyncio
 import os
+import yaml
 from logger import get_logger
 from mistralai import Mistral
 
 # VARIABLES
+gameSelected: int
 logger = ""
 userInput: str
 model: str = "mistral-tiny"
@@ -37,13 +39,57 @@ def mistral_check(apiKey):
         messages=[
              {
                   "role": "user",
-                  "content": "Ne dis rien d'autre que bonjour",
+                  "content": "Exprimes-toi en français. Ne dis rien d'autre que bonjour",
              },
         ],
     )
 
     # Return Mistral answer as validation
     return("Mistral: " + response.choices[0].message.content)
+
+def game_loader():
+    """
+    List available games to the user
+
+    User is asks to select a game
+    Then its rules are returned to the main program
+    """
+    gameSelected: int = None
+
+    # Opening the file containing games
+    # and listing games
+    logger.debug("Loading games from games/fr-games.yaml")
+    with open('games/fr-games.yaml', 'r', encoding='utf-8') as file:
+        games = yaml.safe_load(file)
+
+        for list in games['games']:
+            print(f"{list['number']} - {list['title']} - {list['summary']}")
+
+    while True:
+        logger.debug("Asking user to pick a game or quit")
+        gameSelected = input("Saisir le numéro du jeu auquel jouer, ou 'quit' pour quitter: ")
+
+        logger.debug("User chose " + gameSelected)
+
+        if "quit" in gameSelected:
+            print("A la prochaine!")
+            logger.info("Program exit initiated by user")
+            exit(0)
+
+        # Finding the selected game and returning its rules
+        try:
+            for game in games['games']:
+                if game['number'] == int(gameSelected):
+                    logger.debug("User selected game" + game['title'])
+                    return game['rules']
+        except ValueError:
+            logger.debug("Invalid value typed")
+            continue
+
+        # Returning an error message if invalid value or no value typed
+        print("Il n'y a pas de jeu " + gameSelected)
+        logger.debug("User selected game " + gameSelected + " which does not exists")
+        print()
 
 async def main():
     args = parse_arguments()
@@ -71,25 +117,12 @@ async def main():
         exit(1)
     else:
         logger.debug("APY key seems valid, proceeding...")
+        client = Mistral(api_key=api_key)
 
-    client = Mistral(api_key=api_key)
+    # Getting games rules as the first prompt to Mistral
+    userInput = "Jouons à ce jeu" + game_loader()
 
     while True:
-        # Resetting the user input value to avoid repeating
-        userInput = None
-
-        # Do nothing while user hasn't typed anything
-        while not userInput:
-            print("(écrire 'quit' pour quitter à tout moment)")
-            print()
-            userInput = input("Vous: ")
-
-        # Quitting program properly
-        if "quit" in userInput:
-            print("A la prochaine!")
-            logger.info("Program exit initiated by user")
-            exit(0)
-
         # Sending the user input to Mistral and wait for its answer
         response = await client.chat.stream_async(
             model=model,
@@ -108,8 +141,21 @@ async def main():
             if chunk.data.choices[0].delta.content is not None:
                 print(chunk.data.choices[0].delta.content, end="")
 
-        # Resetting the display
+        # Resetting the display and user input
         print()
+        userInput = None
+
+        # Do nothing while user hasn't typed anything
+        while not userInput:
+            print("(écrire 'quit' pour quitter à tout moment)")
+            print()
+            userInput = input("Vous: ")
+
+        # Quitting program properly
+        if "quit" in userInput:
+            print("A la prochaine!")
+            logger.info("Program exit initiated by user")
+            exit(0)
 
 
 if __name__ == "__main__":
