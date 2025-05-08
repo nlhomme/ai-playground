@@ -34,7 +34,9 @@ games:
     title: Devine le nombre
     summary: Devine le nombre auquel pense l'IA
     rules: |
-      - Penses à un nobre entre -9999 et 9999
+      - Penses à un nombre entier compris entre -9999 et 9999
+      - Ne pense à aucun autre nombre de la partie
+      - N'ajoute pas de règles par toi-même
 
       Rôle du joueur:
       - Le joueur doit uniquement saisir un nombre
