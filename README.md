@@ -45,3 +45,5 @@ options:
 ## Thanks
 
 Thank you [@alexandra-zaharia](https://github.com/alexandra-zaharia) for [the logger](https://alexandra-zaharia.github.io/posts/make-your-own-custom-color-formatter-with-python-logging/)
+
+Thank you [Grace L](https://medium.com/@gracelinja) for your article [Mistral’s Text Generation with Different Message Roles](https://medium.com/@gracelinja/mistrals-text-generation-with-different-message-roles-a5bdef0321cc#eb68), way more hepful than the [Mistral doc...](https://docs.mistral.ai/capabilities/completion/)

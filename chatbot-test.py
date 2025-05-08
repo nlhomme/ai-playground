@@ -3,13 +3,15 @@ import asyncio
 import os
 import yaml
 from logger import get_logger
-from mistralai import Mistral
+from mistralai import Mistral, AssistantMessage, UserMessage
 
 # VARIABLES
+chat: list = [UserMessage(content = "")]
 gameSelected: int
 logger = ""
 userInput: str
 model: str = "mistral-tiny"
+response_content: str
 
 def parse_arguments():
     """
@@ -123,15 +125,13 @@ async def main():
     userInput = "Jouons à ce jeu" + game_loader()
 
     while True:
+        response_content = ""
+        chat.append(UserMessage(content = userInput))
+
         # Sending the user input to Mistral and wait for its answer
         response = await client.chat.stream_async(
-            model=model,
-            messages=[
-                 {
-                      "role": "user",
-                      "content": userInput,
-                  },
-            ],
+            model = model,
+            messages = chat,
         )
         logger.debug("User sended prompt :" + userInput)
 
@@ -139,7 +139,13 @@ async def main():
         print("Mistral: ", end = "")
         async for chunk in response:
             if chunk.data.choices[0].delta.content is not None:
-                print(chunk.data.choices[0].delta.content, end="")
+                content_chunk = chunk.data.choices[0].delta.content
+                print(content_chunk, end="")
+                response_content += content_chunk
+
+        # Adding AI's reply to the conversation
+        chat.append(AssistantMessage(content=response_content))
+        logger.debug("AI answered " + response_content)
 
         # Resetting the display and user input
         print()

@@ -1,5 +1,9 @@
 # Changelog
 
+## v0.3.1 (2025/05/08)
+
+- Fix: no matter the game, the conversation with IA resets when typing an answer
+
 ## v0.3 (2025/05/05)
 
 - ADD: games
